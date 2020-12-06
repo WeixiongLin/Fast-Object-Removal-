@@ -1,3 +1,4 @@
+import os
 import imageio
 
 
@@ -8,14 +9,24 @@ def create_gif(image_list, gif_name, duration=0.35):
     imageio.mimsave(gif_name, frames, 'GIF', duration=duration)
     return
 
+def name_list(image_folder):
+    dirpath = image_folder
+    file_list = []
+    for path, dirname, filename in os.walk(dirpath):
+        file_list = filename
 
-def main():
-    # image_list = ['cat/1.png', 'cat/2.png', 'cat/3.png', 'cat/4.png', 'cat/5.png', 'cat/6.png']
-    image_list = ["out/" + str(i) + ".png" for i in range(58)]
-    gif_name = 'cat.gif'
+    file_list = [int(name[0:-4]) for name in filename]
+    file_list.sort()
+    filename = [str(name)+".png" for name in file_list]
+    file_list = [os.path.join(image_folder, name) for name in filename]
+    return file_list
+
+def main(image_folder, gif_name):
+    image_list = name_list(image_folder)
     duration = 0.35
     create_gif(image_list, gif_name, duration)
 
 
 if __name__ == '__main__':
-    main()
+    outpath_of_gif = 'out.gif'
+    main("out/", outpath_of_gif)
