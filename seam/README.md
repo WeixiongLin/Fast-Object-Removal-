@@ -28,11 +28,11 @@ seam/
 
 1. Seam Carving 算法的作用是在尽量不改变图像内容的情况下对图片进行 resize
 
-例如:
-**Original Image**
+例如:\
+**Original Image**\
 ![original image](https://github.com/vivianhylee/seam-carving/raw/master/example/image6.jpg)
 
-**Resized Image**
+**Resized Image**\
 ![image size expansion](https://github.com/vivianhylee/seam-carving/raw/master/example/image17_result.png)
 
 2. Seam Carving 对一张图片计算 Energy, 纹理越复杂的地方 像素的 energy 越大
