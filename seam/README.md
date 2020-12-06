@@ -24,15 +24,15 @@ seam/
 
 ## Seam Carving
 
-### 复现结果
-**Original Image**
+### 复现结果\
+**Original Image**\
 ![original image](https://github.com/WeixiongLin/newshit/blob/main/figures/pic.jpg)
 
 
-**Mask**
+**Mask**\
 ![original image](https://github.com/WeixiongLin/newshit/blob/main/figures/mask.jpg)
 
-**Output Image**
+**Output Image**\
 ![original image](https://github.com/WeixiongLin/newshit/blob/main/figures/out.gif)
 
 

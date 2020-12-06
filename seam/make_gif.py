@@ -1,7 +1,10 @@
 import os
 import imageio
+import numpy as np
+import cv2
 
 
+# 用 imageio 制作 gif 图片
 def create_gif(image_list, gif_name, duration=0.35):
     frames = []
     for image_name in image_list:
@@ -9,6 +12,7 @@ def create_gif(image_list, gif_name, duration=0.35):
     imageio.mimsave(gif_name, frames, 'GIF', duration=duration)
     return
 
+# 返回 filename list
 def name_list(image_folder):
     dirpath = image_folder
     file_list = []

@@ -90,6 +90,32 @@ class SeamCarver:
             self.out_image = self.rotate_image(self.out_image, 0)
 
 
+    # 返回转动 x 度的 image
+    def rotate(self, image, angle):
+        # grab the dimensions of the image and then determine the
+        # center
+        (h, w) = image.shape[:2]
+        (cX, cY) = (w // 2, h // 2)
+
+        # grab the rotation matrix (applying the negative of the
+        # angle to rotate clockwise), then grab the sine and cosine
+        # (i.e., the rotation components of the matrix)
+        M = cv2.getRotationMatrix2D((cX, cY), -angle, 1.0)
+        cos = np.abs(M[0, 0])
+        sin = np.abs(M[0, 1])
+
+         # compute the new bounding dimensions of the image
+        nW = int((h * sin) + (w * cos))
+        nH = int((h * cos) + (w * sin))
+    
+        # adjust the rotation matrix to take into account translation
+        M[0, 2] += (nW / 2) - cX
+        M[1, 2] += (nH / 2) - cY
+
+        # perform the actual rotation and return the image
+        return cv2.warpAffine(image, M, (nW, nH))
+ 
+
     def object_removal(self):
         """
         :return:
@@ -111,7 +137,7 @@ class SeamCarver:
             seam_idx = self.find_seam(cumulative_map)
             self.delete_seam(seam_idx)
             self.delete_seam_on_mask(seam_idx)
-            cv2.imwrite("out/" + str(cnt) + ".png", self.out_image.astype(np.uint8))
+            cv2.imwrite("out/" + str(cnt) + ".png", self.rotate(self.out_image.astype(np.uint8), 90))
             cnt += 1
 
         if not rotate:
