@@ -24,6 +24,17 @@ seam/
 
 ## Seam Carving
 
+### 复现结果
+**Original Image**
+![original image](https://github.com/WeixiongLin/newshit/figures/pic.jpg)
+
+**Mask**
+![original image](https://github.com/WeixiongLin/newshit/figures/mask.jpg)
+
+**Output Image**
+![original image](https://github.com/WeixiongLin/newshit/figures/out.gif)
+
+
 ### 算法原理
 
 1. Seam Carving 算法的作用是在尽量不改变图像内容的情况下对图片进行 resize
@@ -48,6 +59,12 @@ seam/
 3. [github 复现参考](https://github.com/vivianhylee/seam-carving)
 
 ## Make gif
+```
+python make_gif.py
+```
+把指定文件夹下的图片合成为 gif.
+
+*Note*: 文件夹下的图片名称按照时间顺序从小到大排列
 
 
 ## ROI

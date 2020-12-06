@@ -29,4 +29,4 @@ def main(image_folder, gif_name):
 
 if __name__ == '__main__':
     outpath_of_gif = 'out.gif'
-    main("out/", outpath_of_gif)
+    main(image_folder="out/", gif_name=outpath_of_gif)
