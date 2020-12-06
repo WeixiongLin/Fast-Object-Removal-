@@ -26,13 +26,14 @@ seam/
 
 ### 复现结果
 **Original Image**
-![original image](https://github.com/WeixiongLin/newshit/figures/pic.jpg)
+![original image](https://github.com/WeixiongLin/newshit/blob/main/figures/pic.jpg)
+
 
 **Mask**
-![original image](https://github.com/WeixiongLin/newshit/figures/mask.jpg)
+![original image](https://github.com/WeixiongLin/newshit/blob/main/figures/mask.jpg)
 
 **Output Image**
-![original image](https://github.com/WeixiongLin/newshit/figures/out.gif)
+![original image](https://github.com/WeixiongLin/newshit/blob/main/figures/out.gif)
 
 
 ### 算法原理
