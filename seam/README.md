@@ -36,6 +36,14 @@ seam/
 ![original image](https://github.com/WeixiongLin/newshit/blob/main/figures/out.gif)
 
 
+*Notes:* 如果图片稍微大一点的话(3400x4000), seam carving 要处理非常长的时间, 那么 bottleneck 在哪里?
+
+问题出在: seam_carving.cumulative_map_backward() 这个函数上.
+该函数的作用是进行动态规划.
+
+图片大就慢是因为 DP 方程需要计算的内容变多, OPT[m, n] += min{OPT[m-1, n-1], OPT[m-1, n], OPT[m-1, n+1]}
+我想到对 DP 的改进就是每次选多条 seam delete, 否则每次计算了OPT然后再重新算太浪费了.
+
 ### 算法原理
 
 1. Seam Carving 算法的作用是在尽量不改变图像内容的情况下对图片进行 resize

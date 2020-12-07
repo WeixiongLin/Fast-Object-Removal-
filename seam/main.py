@@ -40,6 +40,8 @@ if __name__ == '__main__':
     output_image = os.path.join(folder_out, "images", filename_output)
     # output_image = "out.jpg"
 
-    # image_resize_without_mask(input_image, output_image, new_height, new_width)
+    # image_resize_without_mask(input_image, "out.png", new_height, new_width)
+    image_resize_without_mask("lwx.jpg", "lwx_out.png", 3500, 4656)  # 3496 x 4656
+
     #image_resize_with_mask(input_image, output_image, new_height, new_width, input_mask)
-    object_removal(input_image, output_image, input_mask)
+    # object_removal(input_image, output_image, input_mask)

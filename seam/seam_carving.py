@@ -67,6 +67,8 @@ class SeamCarver:
         # calculate number of rows and columns needed to be inserted or removed
         delta_row, delta_col = int(self.out_height - self.in_height), int(self.out_width - self.in_width)
 
+        print("here00")
+
         # remove column
         if delta_col < 0:
             self.seams_removal(delta_col * -1)
@@ -160,10 +162,18 @@ class SeamCarver:
                 self.delete_seam(seam_idx)
                 self.delete_seam_on_mask(seam_idx)
         else:
+            i = 0
             for dummy in range(num_pixel):
+                print("{} / {}".format(i, num_pixel))
+                i += 1
+                
+                print("here01")
                 energy_map = self.calc_energy_map()
+                print("here02")
                 cumulative_map = self.cumulative_map_forward(energy_map)
+                print("here03")
                 seam_idx = self.find_seam(cumulative_map)
+                print("here04")
                 self.delete_seam(seam_idx)
 
 
@@ -194,11 +204,20 @@ class SeamCarver:
             temp_image = np.copy(self.out_image)
             seams_record = []
 
+            i = 0
             for dummy in range(num_pixel):
+                print("{} / {}".format(i, num_pixel))
+                i += 1
+
+                print("here01")
                 energy_map = self.calc_energy_map()
-                cumulative_map = self.cumulative_map_backward(energy_map)
+                print("here02")
+                cumulative_map = self.cumulative_map_backward(energy_map)  # 这一步有点慢
+                print("here03")
                 seam_idx = self.find_seam(cumulative_map)
+                print("here04")
                 seams_record.append(seam_idx)
+                print("here05")
                 self.delete_seam(seam_idx)
 
             self.out_image = np.copy(temp_image)
@@ -208,7 +227,7 @@ class SeamCarver:
                 self.add_seam(seam)
                 seams_record = self.update_seams(seams_record, seam)
 
-
+    # 用 Scharr 算子计算图像梯度, 梯度越大能量越高
     def calc_energy_map(self):
         b, g, r = cv2.split(self.out_image)
         b_energy = np.absolute(cv2.Scharr(b, -1, 1, 0)) + np.absolute(cv2.Scharr(b, -1, 0, 1))
