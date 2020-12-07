@@ -78,3 +78,11 @@ python make_gif.py
 
 ## ROI
 
+传统 Seam Carving 的问题在于:
+1. 需要用DP计算 seam
+2. mask 的设置必须非常精确, 否则会有残余
+
+传统 ROI 方法的问题在于:
+总的来说分辨率没有保证, 而且会出现马赛克
+
+<!-- 我们可以先进行 image segmentation, 然后让用户轻易选择需要 remove 的 object. -->
