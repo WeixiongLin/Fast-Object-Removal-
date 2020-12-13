@@ -1,5 +1,7 @@
-'''edge:[from,to,capacity,cost]
-usage: objectRemoval(image,mask)
+'''
+some changes were made to getRemovalPaths()
+edge:[from,to,capacity,cost]
+usage: getRemovalPaths(image,mask)
 '''
 import cv2, imageio, imutils
 import numpy as np
