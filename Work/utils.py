@@ -19,3 +19,40 @@ def calc_neighbor_matrix(img, kernel):
              np.absolute(cv2.filter2D(g, -1, kernel=kernel)) + \
              np.absolute(cv2.filter2D(r, -1, kernel=kernel))
     return output
+
+
+
+# @author: Weixiong Lin
+def max_width(mask):
+    """Calculate maximum width of the mask area
+
+    Scan row by row of the mask image.
+
+    Args:
+        mask: The path of mask image.
+    
+    Returns:
+        max_width_mask: The maximum width of mask area.
+    
+    Raises:
+        FileError: An error occured accessing the image object.
+    """
+    mask_img = cv2.imread(mask, cv2.IMREAD_GRAYSCALE)
+    width, height = mask_img.shape
+
+    # count max width
+    max_wid = 0
+    for i in range(width):
+        # initialize leftend and rightend of mask area as -1
+        leftend = -1
+        rightend = -1
+        for j in range(height-1):
+            if mask_img[i, j] > 30 and leftend == -1:
+                leftend = j
+            if mask_img[i, j] == 0 and mask_img[i-1, j] > 0 and i > 0:
+                rightend = j
+                break
+        max_wid = max(max_wid, rightend-leftend)
+    
+    # print("max width: {}".format(max_wid))
+    return max_wid

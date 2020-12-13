@@ -119,6 +119,11 @@ def minCostFlow(N, edges, K, s, t):
         paths.append(path)
     return flow, paths
 
-image='figures/duck.jpg'
-mask='figures/duck_mask.jpg'
-objectRemoval(image,mask)
+
+# image='figures/duck.jpg'
+image='../figures/pic.jpg'
+# mask='figures/duck_mask.jpg'
+mask='../figures/mask.jpg'
+
+# objectRemoval(image,mask)
+print("max width: {}".format(max_width(mask)))
