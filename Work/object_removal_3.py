@@ -6,10 +6,11 @@ this means we have to construct graphs in multiple times
 import numpy as np
 from queue import Queue
 from collections import defaultdict
-# from git_utils import *
 import imutils
 import cv2
 from utils import *
+# from git_utils import *
+import imutils,cv2
 
 INF = 1e9
 constant = 1000
@@ -157,12 +158,12 @@ def objectRemoval(imagePath,maskPath):
         mask = rotatedMask
         flag = 1
     while len(np.where(mask[:, :] > 0)[0]) > 0:
-            energy_map = calc_energy_map(img)
-            print(type(np.where(mask[:, :] > 0)[0][0]))
-            energy_map[np.where(mask[:, :] > 0)] *= -constant
-            adj,cost,cap,n,s1,t,H,W=constructGraph(img,mask)
-            flow,paths=minCostFlow(adj,cost,cap,n,maxSeamNum,s1,t,H,W)
-            img,mask=delete(img,mask,paths)
+        energy_map = calc_energy_map(img)
+        print(type(np.where(mask[:, :] > 0)[0][0]))
+        energy_map[np.where(mask[:, :] > 0)] *= -constant
+        adj,cost,cap,n,s1,t,H,W=constructGraph(img,mask)
+        flow,paths=minCostFlow(adj,cost,cap,n,maxSeamNum,s1,t,H,W)
+        img,mask=delete(img,mask,paths)
 
 
 objectRemoval('../figures/pic.jpg', '../figures/mask.jpg')
