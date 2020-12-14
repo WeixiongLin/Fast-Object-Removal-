@@ -7,7 +7,7 @@ import numpy as np
 from queue import Queue
 from collections import defaultdict
 from git_utils import *
-import imutils
+import imutils,cv2
 
 INF = 1e9
 constant = 1000
