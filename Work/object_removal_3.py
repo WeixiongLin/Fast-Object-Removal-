@@ -6,8 +6,10 @@ this means we have to construct graphs in multiple times
 import numpy as np
 from queue import Queue
 from collections import defaultdict
-from git_utils import *
+# from git_utils import *
 import imutils
+import cv2
+from utils import *
 
 INF = 1e9
 constant = 1000
@@ -143,18 +145,24 @@ def minCostFlow(adj,cost,cap, N, K, s, t, H, W):
 
 def objectRemoval(imagePath,maskPath):
     img=cv2.imread(imagePath)
-    mask=cv2.imread(maskPath)
+    mask=cv2.imread(maskPath, 0)
     flag = 0  # if flag=1, rotation has been performed
-    maskWidth = max_width(mask)
+
+    ratio = 1
+    maskWidth = max_width(mask) // ratio
     rotatedMask = imutils.rotate(mask, angle=90)
-    rotatedMaskWidth = max_width(rotatedMask)
+    rotatedMaskWidth = max_width(rotatedMask) // ratio
     if rotatedMaskWidth < maskWidth:
         img = imutils.rotate(img, angle=90)
         mask = rotatedMask
         flag = 1
     while len(np.where(mask[:, :] > 0)[0]) > 0:
-            energy_map = calc_energy_map()
+            energy_map = calc_energy_map(img)
+            print(type(np.where(mask[:, :] > 0)[0][0]))
             energy_map[np.where(mask[:, :] > 0)] *= -constant
             adj,cost,cap,n,s1,t,H,W=constructGraph(img,mask)
             flow,paths=minCostFlow(adj,cost,cap,n,maxSeamNum,s1,t,H,W)
-            #img,mask=delete(img,mask,paths)
+            img,mask=delete(img,mask,paths)
+
+
+objectRemoval('../figures/pic.jpg', '../figures/mask.jpg')

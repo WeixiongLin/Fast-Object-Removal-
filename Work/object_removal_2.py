@@ -23,11 +23,11 @@ def getRemovalPaths(image, maskPath):
     flag = 0  # if flag=1, rotation has been performed
 
     # ratio divided by bottleneck
-    ratio = 1
-    bottleNeck = max_width(maskPath) // ratio
+    ratio = 10
+    bottleNeck = max_width(mask) // ratio
     print(f'1:{bottleNeck}')
 
-    rotatedMask = "../figures/ro.jpg"
+    rotatedMask = imutils.rotate(mask, angle=90)
     bottleNeck2 = max_width(rotatedMask) // ratio
     print(f'2:{bottleNeck2}')
     mat=cv2.imread(image)
@@ -40,6 +40,8 @@ def getRemovalPaths(image, maskPath):
     W = mat.shape[1]
     
     eMap = calc_energy_map(mat).astype(np.int32)
+    # print(mask)
+    # print(np.where(mask[:, :] > 0))
     eMap[np.where(mask[:, :] > 0)] *= -constant
     print(f'bottleneck={bottleNeck}')
     edges = []
@@ -149,5 +151,6 @@ mask='../figures/mask.jpg'
 numOfSeam, paths, flag = getRemovalPaths(image, mask)
 
 # 运行之后会生成带有 seams 的图片和remove之后的
-new_img = delete_seams(image, paths)
-cv2.imwrite("deleted.png", new_img)
+# img = cv2.imread(image, cv2.IMREAD_GRAYSCALE)
+# new_img = delete_seams(img, paths)
+# cv2.imwrite("deleted.png", new_img)
