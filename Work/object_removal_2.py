@@ -21,14 +21,17 @@ def getRemovalPaths(image, maskPath):
     mask = cv2.imread(maskPath, 0)
     print(mask.shape)
     flag = 0  # if flag=1, rotation has been performed
-    bottleNeck = max_width(maskPath)
+
+    # ratio divided by bottleneck
+    ratio = 1
+    bottleNeck = max_width(maskPath) // ratio
     print(f'1:{bottleNeck}')
 
     rotatedMask = "../figures/ro.jpg"
-    bottleNeck2 = max_width(rotatedMask)
+    bottleNeck2 = max_width(rotatedMask) // ratio
     print(f'2:{bottleNeck2}')
     mat=cv2.imread(image)
-    if bottleNeck>bottleNeck2:
+    if bottleNeck > bottleNeck2:
         mat=imutils.rotate(mat,angle=90)
         flag=1
         bottleNeck=bottleNeck2
@@ -78,8 +81,8 @@ def getRemovalPaths(image, maskPath):
     numOfSeam, paths = minCostFlow(num, edges, bottleNeck, s1, t, H,
                                    W)  # path doesn't inlcude t, 21, s2. but it is in reversed order.
     print(f'number of seams={numOfSeam}')
-    for path in paths:
-        print(f'{path}\n')
+    # for path in paths:
+    #     print(f'{path}\n')
     return numOfSeam, paths, flag
 
 
@@ -144,4 +147,5 @@ image='../figures/pic.jpg'
 mask='../figures/mask.jpg'
 
 numOfSeam, paths, flag = getRemovalPaths(image, mask)
-print("numofseam:{}".format(numOfSeam))
+new_img = delete_seams(image, paths)
+cv2.imwrite("deleted.png", new_img)

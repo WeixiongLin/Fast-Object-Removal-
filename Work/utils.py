@@ -77,3 +77,37 @@ def max_width(mask):
     
     print("max width: {}".format(max_wid))
     return max_wid
+
+
+# @author: Weixiong Lin
+def delete_seams(img_path, paths):
+    """Deleted the given seams in img
+
+    Mark the pixels to be deleted in the matrix, copy the rest of them to new_img.
+
+    Args:
+        img: Given image to be processed.
+        paths: List of path of seams.
+
+    Returns:
+        new_img: New image with seams deleted.
+
+    Rasie:
+        RuntimeError: Out of index.
+    """
+    img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+    height, width = img.shape
+    flag_matrix = np.zeros((height, width))
+    for path in paths:
+        for index in path:
+            x, y = index
+            flag_matrix[x, y] = -1
+    # print("nunmofpaths", len(paths))
+    new_img = np.zeros((height, width-len(paths)))
+    for i in range(height):
+        col = 0
+        for j in range(width):
+            if flag_matrix[i, j] > -1:
+                new_img[i, col] = img[i, j]
+                col += 1
+    return new_img
