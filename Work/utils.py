@@ -102,6 +102,9 @@ def delete_seams(img_path, paths):
         for index in path:
             x, y = index
             flag_matrix[x, y] = -1
+            img[x, y] = -1
+    
+    cv2.imwrite("seams.png", img)
     # print("nunmofpaths", len(paths))
     new_img = np.zeros((height, width-len(paths)))
     for i in range(height):

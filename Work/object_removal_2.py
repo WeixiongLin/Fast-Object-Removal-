@@ -147,5 +147,7 @@ image='../figures/pic.jpg'
 mask='../figures/mask.jpg'
 
 numOfSeam, paths, flag = getRemovalPaths(image, mask)
+
+# 运行之后会生成带有 seams 的图片和remove之后的
 new_img = delete_seams(image, paths)
 cv2.imwrite("deleted.png", new_img)
