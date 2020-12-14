@@ -153,8 +153,8 @@ def objectRemoval(imagePath,maskPath):
         mask = rotatedMask
         flag = 1
     while len(np.where(mask[:, :] > 0)[0]) > 0:
-            energy_map = calc_energy_map()
-            energy_map[np.where(mask[:, :] > 0)] *= -constant
-            adj,cost,cap,n,s1,t,H,W=constructGraph(img,mask)
-            flow,paths=minCostFlow(adj,cost,cap,n,maxSeamNum,s1,t,H,W)
-            #img,mask=delete(img,mask,paths)
+        energy_map = calc_energy_map()
+        energy_map[np.where(mask[:, :] > 0)] *= -constant
+        adj,cost,cap,n,s1,t,H,W=constructGraph(img,mask)
+        flow,paths=minCostFlow(adj,cost,cap,n,maxSeamNum,s1,t,H,W)
+        #img,mask=delete(img,mask,paths) I decide to calculate max_width of mask again, if max_width<maxSeamNum, I don't need to find so many seams
