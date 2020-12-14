@@ -163,7 +163,7 @@ def objectRemoval(imagePath,maskPath):
         energy_map[np.where(mask[:, :] > 0)] *= -constant
         adj,cost,cap,n,s1,t,H,W=constructGraph(img,mask)
         flow,paths=minCostFlow(adj,cost,cap,n,maxSeamNum,s1,t,H,W)
-        img,mask=delete(img,mask,paths)
+        img,mask=delete_seams(img,mask,paths)
 
 
 objectRemoval('../figures/pic.jpg', '../figures/mask.jpg')
