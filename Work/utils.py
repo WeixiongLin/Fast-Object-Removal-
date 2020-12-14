@@ -49,7 +49,7 @@ def max_width(mask):
     """
     mask_img = cv2.imread(mask, cv2.IMREAD_GRAYSCALE)
     # 旋转90
-    mask_img = np.rot90(mask_img)
+    # mask_img = np.rot90(mask_img)
     cv2.imwrite("ro.jpg", mask_img)
     # 均值滤波
     # mask_img = cv2.blur(mask_img, (5, 5))
