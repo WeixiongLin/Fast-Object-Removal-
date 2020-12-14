@@ -1,5 +1,7 @@
-'''edge:[from,to,capacity,cost]
-usage: objectRemoval(image,mask)
+'''
+some changes were made to getRemovalPaths()
+edge:[from,to,capacity,cost]
+usage: getRemovalPaths(image,mask)
 '''
 import cv2, imageio, imutils
 import numpy as np
@@ -33,7 +35,7 @@ def getRemovalPaths(image, maskPath):
         mask=rotatedMask
     H = mat.shape[0]
     W = mat.shape[1]
-    bottleNeck=min(bottleNeck,4)
+    
     eMap = calc_energy_map(mat).astype(np.int32)
     eMap[np.where(mask[:, :] > 0)] *= -constant
     print(f'bottleneck={bottleNeck}')
