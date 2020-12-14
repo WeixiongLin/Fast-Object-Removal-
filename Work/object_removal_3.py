@@ -48,7 +48,7 @@ def constructGraph(img,mask):
         nodeNum=2*y
         adj[s2].append(nodeNum)
         cap[(s2, nodeNum)] = 1
-        costDic[(s1, s2)] = cost
+        costDic[(s2, nodeNum)] = cost
     # add edges in the following rows
     for x in range(H - 1):
         for y in range(connectionWidth + 1):
