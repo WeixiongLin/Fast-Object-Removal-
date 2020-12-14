@@ -8,9 +8,13 @@ kernel_y_right = np.array([[0., 0., 0.], [1., 0., 0.], [0., -1., 0.]], dtype=np.
 
 def calc_energy_map(img):
     b, g, r = cv2.split(img)
-    b_energy = np.absolute(cv2.Scharr(b, -1, 1, 0)) + np.absolute(cv2.Scharr(b, -1, 0, 1), dtype=np.int16)
-    g_energy = np.absolute(cv2.Scharr(g, -1, 1, 0)) + np.absolute(cv2.Scharr(g, -1, 0, 1), dtype=np.int16)
-    r_energy = np.absolute(cv2.Scharr(r, -1, 1, 0)) + np.absolute(cv2.Scharr(r, -1, 0, 1), dtype=np.int16)
+    # b_energy = np.absolute(cv2.Scharr(b, -1, 1, 0)) + np.absolute(cv2.Scharr(b, -1, 0, 1))
+    # g_energy = np.absolute(cv2.Scharr(g, -1, 1, 0)) + np.absolute(cv2.Scharr(g, -1, 0, 1))
+    # r_energy = np.absolute(cv2.Scharr(r, -1, 1, 0)) + np.absolute(cv2.Scharr(r, -1, 0, 1))
+
+    b_energy = np.absolute(cv2.Scharr(b, -1, 1, 0), dtype=np.int16) + np.absolute(cv2.Scharr(b, -1, 0, 1), dtype=np.int16)
+    g_energy = np.absolute(cv2.Scharr(g, -1, 1, 0), dtype=np.int16) + np.absolute(cv2.Scharr(g, -1, 0, 1), dtype=np.int16)
+    r_energy = np.absolute(cv2.Scharr(r, -1, 1, 0), dtype=np.int16) + np.absolute(cv2.Scharr(r, -1, 0, 1), dtype=np.int16)
     return b_energy + g_energy + r_energy
 
 def calc_neighbor_matrix(img, kernel):
@@ -79,7 +83,7 @@ def max_width(mask):
     mask_img = mask
     # print("pixel:", mask[0, 0])
     # ret, mask_img = cv2.threshold(mask_img, 30, 255, cv2.THRESH_BINARY)
-    print("shape", mask_img.shape)
+    # print("shape", mask_img.shape)
     height, width = mask_img.shape
 
     # count max width
@@ -98,7 +102,7 @@ def max_width(mask):
                 break
         max_wid = max(max_wid, rightend-leftend)
     
-    print("max width: {}".format(max_wid))
+    # print("max width: {}".format(max_wid))
     return max_wid
 
 
@@ -120,7 +124,7 @@ def delete_seams(img, mask, paths):
     Rasie:
         RuntimeError: Out of index.
     """
-    height, width = img.shape
+    height, width, _ = img.shape
     flag_matrix = np.zeros((height, width))
     for path in paths:
         for index in path:
@@ -130,7 +134,7 @@ def delete_seams(img, mask, paths):
     
     cv2.imwrite("seams.png", img)
     # print("nunmofpaths", len(paths))
-    new_img = np.zeros((height, width-len(paths)))
+    new_img = np.zeros((height, width-len(paths), 3), dtype=np.int16)
     new_mask = np.zeros((height, width-len(paths)))
 
     # Erase seams from img

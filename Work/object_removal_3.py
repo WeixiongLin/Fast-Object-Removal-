@@ -149,21 +149,25 @@ def objectRemoval(imagePath,maskPath):
     mask=cv2.imread(maskPath, 0)
     flag = 0  # if flag=1, rotation has been performed
 
-    ratio = 1
+    ratio = 10
     maskWidth = max_width(mask) // ratio
     rotatedMask = imutils.rotate(mask, angle=90)
     rotatedMaskWidth = max_width(rotatedMask) // ratio
+    print("min width", min(maskWidth, rotatedMaskWidth))
     if rotatedMaskWidth < maskWidth:
         img = imutils.rotate(img, angle=90)
         mask = rotatedMask
         flag = 1
+    cnt = 0
     while len(np.where(mask[:, :] > 0)[0]) > 0:
+        cnt += 1
+        print("cnt: ", cnt)
         energy_map = calc_energy_map(img)
-        print(type(np.where(mask[:, :] > 0)[0][0]))
         energy_map[np.where(mask[:, :] > 0)] *= -constant
         adj,cost,cap,n,s1,t,H,W=constructGraph(img,mask)
         flow,paths=minCostFlow(adj,cost,cap,n,maxSeamNum,s1,t,H,W)
-        img,mask=delete(img,mask,paths)
+        img,mask = delete_seams(img,mask,paths)    
+    cv2.imwrite("deleted.png", img)
 
 
 objectRemoval('../figures/pic.jpg', '../figures/mask.jpg')
