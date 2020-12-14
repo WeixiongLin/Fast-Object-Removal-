@@ -125,7 +125,7 @@ def shortestPath(n, v0, t, adj, cap, cost, H, W):
     while cur != v0:
         cap[(prev[cur], cur)] -= 1
         cur = prev[cur]
-        if cur % 2 == 0:
+        if cur < 2 * H * W and cur % 2 == 0:
             x = cur // _W
             y = (cur - _W * x) // 2
             path.append((x, y))
