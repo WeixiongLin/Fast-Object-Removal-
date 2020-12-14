@@ -169,5 +169,4 @@ def objectRemoval(imagePath,maskPath):
         img,mask = delete_seams(img,mask,paths)    
     cv2.imwrite("deleted.png", img)
 
-
 objectRemoval('../figures/pic.jpg', '../figures/mask.jpg')
