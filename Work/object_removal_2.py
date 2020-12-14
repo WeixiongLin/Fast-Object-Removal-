@@ -18,11 +18,12 @@ def getRemovalPaths(image, maskPath):
 
     mask = cv2.imread(maskPath, 0)
     print(mask.shape)
-    flag=0 # if flag=1, rotation has been performed
-    bottleNeck = max_width(mask)
+    flag = 0  # if flag=1, rotation has been performed
+    bottleNeck = max_width(maskPath)
     print(f'1:{bottleNeck}')
-    rotatedMask=imutils.rotate(mask,90)
-    bottleNeck2=max_width(rotatedMask)
+
+    rotatedMask = "../figures/ro.jpg"
+    bottleNeck2 = max_width(rotatedMask)
     print(f'2:{bottleNeck2}')
     mat=cv2.imread(image)
     if bottleNeck>bottleNeck2:
@@ -137,6 +138,8 @@ def minCostFlow(N, edges, K, s, t, H, W):
     return flow, paths
 
 
-image = 'figures/duck.jpg'
-mask = 'figures/duck_mask.jpg'
-getRemovalPaths(image, mask)
+image='../figures/pic.jpg'
+mask='../figures/mask.jpg'
+
+numOfSeam, paths, flag = getRemovalPaths(image, mask)
+print("numofseam:{}".format(numOfSeam))

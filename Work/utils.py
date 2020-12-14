@@ -20,7 +20,17 @@ def calc_neighbor_matrix(img, kernel):
              np.absolute(cv2.filter2D(r, -1, kernel=kernel))
     return output
 
-
+# @author: Weixiong Lin
+def branding(img, index, radius):
+    x, y = index
+    dx = [i for i in range(-radius, radius)]
+    dy = [i for i in range(-radius, radius)]
+    height, width = img.shape
+    for i in dx:
+        for j in dy:
+            if x+i > 0 and x+i < height and y+j > 0 and y+j < width:
+                img[x+i, y+j] = 255
+    return img
 
 # @author: Weixiong Lin
 def max_width(mask):
@@ -38,21 +48,32 @@ def max_width(mask):
         FileError: An error occured accessing the image object.
     """
     mask_img = cv2.imread(mask, cv2.IMREAD_GRAYSCALE)
-    width, height = mask_img.shape
+    # 旋转90
+    mask_img = np.rot90(mask_img)
+    cv2.imwrite("ro.jpg", mask_img)
+    # 均值滤波
+    # mask_img = cv2.blur(mask_img, (5, 5))
+    # 二值化
+    ret, mask_img = cv2.threshold(mask_img, 30, 255, cv2.THRESH_BINARY)
+    # cv2.imwrite("mask_img.png", mask_img)
+    # print("image shape: {}".format(mask_img.shape))
+    height, width = mask_img.shape
 
     # count max width
     max_wid = 0
-    for i in range(width):
+    for i in range(height):
         # initialize leftend and rightend of mask area as -1
         leftend = -1
         rightend = -1
-        for j in range(height-1):
+        for j in range(width-1):
             if mask_img[i, j] > 30 and leftend == -1:
                 leftend = j
-            if mask_img[i, j] == 0 and mask_img[i-1, j] > 0 and i > 0:
+            if mask_img[i, j] == 0 and mask_img[i, j-1] > 0 and j > 0:
                 rightend = j
+                # cv2.imwrite("mask_img.png", branding(mask_img, (i, j), 2))
+                # print("leftend:({}, {}); rightedn:({}, {})\n".format(i, leftend, i, rightend))
                 break
         max_wid = max(max_wid, rightend-leftend)
     
-    # print("max width: {}".format(max_wid))
+    print("max width: {}".format(max_wid))
     return max_wid

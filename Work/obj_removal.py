@@ -113,6 +113,7 @@ def minCostFlow(N, edges, K, s, t):
         flow += 1
         print(f'flow={flow}')
         flag, path = shortestPath(N, s, t, adj, cap, cost)
+        print(path)
         print('finish calc path')
         if flag == -1:
             break
@@ -120,10 +121,12 @@ def minCostFlow(N, edges, K, s, t):
     return flow, paths
 
 
-# image='figures/duck.jpg'
 image='../figures/pic.jpg'
-# mask='figures/duck_mask.jpg'
 mask='../figures/mask.jpg'
 
-# objectRemoval(image,mask)
-print("max width: {}".format(max_width(mask)))
+# numofpath, paths = objectRemoval(image,mask)
+# print(numofpath)
+# print(paths)
+# print("max width: {}".format(max_width(mask)))
+
+max_width(mask)
