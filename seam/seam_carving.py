@@ -67,8 +67,6 @@ class SeamCarver:
         # calculate number of rows and columns needed to be inserted or removed
         delta_row, delta_col = int(self.out_height - self.in_height), int(self.out_width - self.in_width)
 
-        print("here00")
-
         # remove column
         if delta_col < 0:
             self.seams_removal(delta_col * -1)
@@ -167,13 +165,9 @@ class SeamCarver:
                 print("{} / {}".format(i, num_pixel))
                 i += 1
                 
-                print("here01")
                 energy_map = self.calc_energy_map()
-                print("here02")
                 cumulative_map = self.cumulative_map_forward(energy_map)
-                print("here03")
                 seam_idx = self.find_seam(cumulative_map)
-                print("here04")
                 self.delete_seam(seam_idx)
 
 
@@ -203,22 +197,12 @@ class SeamCarver:
         else:
             temp_image = np.copy(self.out_image)
             seams_record = []
-
-            i = 0
             for dummy in range(num_pixel):
-                print("{} / {}".format(i, num_pixel))
-                i += 1
-
-                print("here01")
                 energy_map = self.calc_energy_map()
-                print("here02")
                 cumulative_map = self.cumulative_map_backward(energy_map)  # 这一步有点慢
-                print("here03")
                 seam_idx = self.find_seam(cumulative_map)
-                print("here04")
                 seams_record.append(seam_idx)
-                print("here05")
-                self.delete_seam(seam_idx)
+                # self.delete_seam(seam_idx)
 
             self.out_image = np.copy(temp_image)
             n = len(seams_record)

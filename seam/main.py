@@ -1,6 +1,7 @@
 from seam_carving import SeamCarver
 
 import os
+import time
 
 
 
@@ -25,6 +26,7 @@ if __name__ == '__main__':
     Put image in in/images folder and protect or object mask in in/masks folder
     Ouput image will be saved to out/images folder with filename_output
     """
+    start = time.time()
 
     folder_in = 'in'
     folder_out = 'out'
@@ -41,7 +43,11 @@ if __name__ == '__main__':
     # output_image = "out.jpg"
 
     # image_resize_without_mask(input_image, "out.png", new_height, new_width)
-    image_resize_without_mask("lwx.jpg", "lwx_out.png", 3500, 4656)  # 3496 x 4656
+    # image_resize_without_mask("lwx.jpg", "lwx_out.png", 3500, 4656)  # 3496 x 4656
 
     #image_resize_with_mask(input_image, output_image, new_height, new_width, input_mask)
-    # object_removal(input_image, output_image, input_mask)
+    object_removal("../figures/pic.jpg", "deleted.png", "../figures/mask.jpg")
+
+    end = time.time()
+    print("循环运行时间:%.2f秒"%(end-start))
+    
