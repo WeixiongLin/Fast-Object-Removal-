@@ -86,34 +86,33 @@ def max_width(mask):
     # ret, mask_img = cv2.threshold(mask_img, 30, 255, cv2.THRESH_BINARY)
     # print("shape", mask_img.shape)
     height, width = mask_img.shape
-    print("shape", height, width)
 
     # count max width
     max_wid = 0
-    for i in range(height):
-        # initialize leftend and rightend of mask area as -1
-        leftend = -1
-        rightend = -1
-        for j in range(width-1):
-            if mask_img[i, j] > 30 and leftend == -1:
-                leftend = j
-            if mask_img[i, j] == 0 and mask_img[i, j-1] > 0 and j > 0:
-                rightend = j
-                cv2.imwrite("mask_img.png", branding(mask_img, (i, j), 1))
-                # print("leftend:({}, {}); rightedn:({}, {})\n".format(i, leftend, i, rightend))
-                break
-    # for col in range(width):
+    # for i in range(height):
     #     # initialize leftend and rightend of mask area as -1
     #     leftend = -1
     #     rightend = -1
-    #     for row in range(height-1):
-    #         if mask_img[row, col] > 30 and leftend == -1:
-    #             leftend = row
-    #         if mask_img[row, col] == 0 and mask_img[row-1, col] > 0 and row > 0:
-    #             rightend = row
-    #             # cv2.imwrite("mask_img.png", branding(mask_img, (i, j), 2))
+    #     for j in range(width-1):
+    #         if mask_img[i, j] > 30 and leftend == -1:
+    #             leftend = j
+    #         if mask_img[i, j] == 0 and mask_img[i, j-1] > 0 and j > 0:
+    #             rightend = j
+    #             cv2.imwrite("mask_img.png", branding(mask_img, (i, j), 1))
     #             # print("leftend:({}, {}); rightedn:({}, {})\n".format(i, leftend, i, rightend))
     #             break
+    for col in range(width):
+        # initialize leftend and rightend of mask area as -1
+        leftend = -1
+        rightend = -1
+        for row in range(height-1):
+            if mask_img[row, col] > 30 and leftend == -1:
+                leftend = row
+            if mask_img[row, col] == 0 and mask_img[row-1, col] > 0 and row > 0:
+                rightend = row
+                # cv2.imwrite("mask_img.png", branding(mask_img, (i, j), 2))
+                # print("leftend:({}, {}); rightedn:({}, {})\n".format(i, leftend, i, rightend))
+                break
         max_wid = max(max_wid, rightend-leftend)
     
     # print("max width: {}".format(max_wid))
@@ -138,6 +137,8 @@ def delete_seams(img, mask, paths):
     Rasie:
         RuntimeError: Out of index.
     """
+    print("img.shape", img.shape)
+    print("mask.shape", mask.shape)
     height, width, _ = img.shape
     flag_matrix = np.zeros((height, width))
     for path in paths:
@@ -167,3 +168,54 @@ def delete_seams(img, mask, paths):
                 new_mask[i, col] = mask[i, j]
                 col += 1
     return new_img, new_mask
+
+# @author: Weixiong Lin
+def add_seams(img, paths):
+    height, width, _ = img.shape
+    flag_matrix = np.zeros((height, width+len(paths)), dtype=np.int16)
+    for path in paths:
+        for index in path:
+            x, y = index
+            flag_matrix[x, y] = -1
+    new_img = np.zeros((height, width+len(paths), 3), dtype=np.int16)
+    # Erase seams from img
+    for i in range(height):
+        col = 0
+        j = 0
+        while col < width+len(paths):
+            if flag_matrix[i, j] > -1:
+                new_img[i, col] = img[i, j]
+                col += 1
+                j += 1
+            else:
+                new_img[i, col] = img[i, j]
+                col += 1
+                if j == 0 or j == width-1:
+                    x, y = img[i, j], img[i, j]
+                else:
+                    x, y = img[i, j-1], img[i, j+1]
+                new_img[i, col] = (x + y) // 2
+                col += 1
+                j += 1
+    return new_img
+
+
+# @author: Weixiong Lin
+def add_seam(out_image, seam_idx):
+    m, n = out_image.shape[: 2]
+    output = np.zeros((m, n + 1, 3))
+    for (row, col) in seam_idx:
+        for ch in range(3):
+            if col == 0:
+                p = np.average(out_image[row, col: col + 2, ch])
+                output[row, col, ch] = out_image[row, col, ch]
+                output[row, col + 1, ch] = p
+                output[row, col + 1:, ch] = out_image[row, col:, ch]
+            else:
+                p = np.average(out_image[row, col - 1: col + 1, ch])
+                output[row, : col, ch] = out_image[row, : col, ch]
+                output[row, col, ch] = p
+                output[row, col + 1:, ch] = out_image[row, col:, ch]
+    print("output.shape", output.shape)
+    return output
+

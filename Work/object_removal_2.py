@@ -152,7 +152,7 @@ def objectRemoval(imagePath,maskPath):
 
     ratio = 1
     maskWidth = max_width(mask) // ratio
-    rotatedMask = imutils.rotate(mask, angle=90)
+    rotatedMask = cv2.rotate(mask, cv2.ROTATE_90_CLOCKWISE)
     cv2.imwrite("mask.jpg", mask)
     cv2.imwrite("rotated.jpg", rotatedMask)
     rotatedMaskWidth = max_width(rotatedMask) // ratio
@@ -160,29 +160,35 @@ def objectRemoval(imagePath,maskPath):
     print("rotatedMaskWidth", rotatedMaskWidth)
     print("min width", min(maskWidth, rotatedMaskWidth))
     if rotatedMaskWidth < maskWidth:
-        img = imutils.rotate(img, angle=90)
+        img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
         mask = rotatedMask
         flag = 1
     cnt = 0
     while len(np.where(mask[:, :] > 0)[0]) > 0:
-        cnt += 1
         print("cnt: ", cnt)
         energy_map = calc_energy_map(img)
         energy_map[np.where(mask[:, :] > 0)] *= -constant
         adj,cost,cap,n,s1,t,H,W=constructGraph(img,mask)
         flow,paths=minCostFlow(adj,cost,cap,n,maxSeamNum,s1,t,H,W)
-        print(len(paths[0]))
-        img,mask = delete_seams(img,mask,paths)
-        cv2.imwrite("deleted.png", img)
+        cnt += len(paths)
+        img,mask = delete_seams(img, mask, paths)
 
-    
+    print("img.shape", img.shape)
     # find cnt seams to add back to image to retain its shape
     addedSeam=0
-    while addedSeam<cnt:
+    while addedSeam < cnt:
+        print("addedSeam", addedSeam)
         adj, cost, cap, n, s1, t, H, W = constructGraph(img, mask)
         flow, paths = minCostFlow(adj, cost, cap, n, maxSeamNum, s1, t, H, W)
-        # add_seams(...)
-        addedSeam+=flow
+        print("len(paths)", len(paths))
+        print("len(paths[0])", len(paths[0]))
+        img = add_seams(img, paths)
+        addedSeam += flow
+        img = img.astype(np.int16)
+    if flag:
+        img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    print("img.shape", img.shape)
+    cv2.imwrite("deleted.png", img)
 
 
 start = time.time()
