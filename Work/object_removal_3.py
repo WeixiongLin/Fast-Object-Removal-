@@ -11,6 +11,7 @@ import cv2
 from utils import *
 # from git_utils import *
 import imutils,cv2
+import time
 
 INF = 1e9
 constant = 1000
@@ -169,4 +170,8 @@ def objectRemoval(imagePath,maskPath):
         img,mask = delete_seams(img,mask,paths)    
     cv2.imwrite("deleted.png", img)
 
+
+start = time.time()
 objectRemoval('../figures/pic.jpg', '../figures/mask.jpg')
+end = time.time()
+print("循环运行时间:%.2f秒"%(end-start))
