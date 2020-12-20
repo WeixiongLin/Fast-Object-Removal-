@@ -1,6 +1,6 @@
 '''
-use while loop to delete seams,
-this means we have to construct graphs in multiple times
+12.20 update
+use while loops to add seams, change adding method
 '''
 
 import numpy as np
@@ -9,6 +9,7 @@ from collections import defaultdict
 import imutils
 import cv2
 from utils import *
+import utils2 as util
 # from git_utils import *
 import imutils,cv2
 import time
@@ -30,7 +31,7 @@ def constructGraph(img,mask):
 
     H = img.shape[0]
     W = img.shape[1]
-    eMap = calc_energy_map(img).astype(np.int32)
+    eMap = calc_energy_map(img).astype(np.int64)
     eMap[np.where(mask[:, :] > 0)] *= -constant
     s1, s2 = 2 * W * H , 2 * W * H +1  # caution
     t = 2 * W * H+2
@@ -141,7 +142,8 @@ def minCostFlow(adj,cost,cap, N, K, s, t, H, W):
         flag, path = shortestPath(N, s, t, adj, cap, cost, H, W)
         # print('finish calc path')
         if flag == -1:
-            break
+            print('can\'t find shortest path, exit')
+            exit(-1)
         paths.append(path)
     return flow, paths
 
@@ -170,16 +172,16 @@ def objectRemoval(imagePath,maskPath):
         energy_map[np.where(mask[:, :] > 0)] *= -constant
         adj,cost,cap,n,s1,t,H,W=constructGraph(img,mask)
         flow,paths=minCostFlow(adj,cost,cap,n,maxSeamNum,s1,t,H,W)
-        cnt += len(paths)
+        cnt += flow
         img,mask = delete_seams(img, mask, paths)
-
+    cv2.imwrite('deleted.jpg',img)
     print("img.shape", img.shape)
-    # find cnt seams to add back to image to retain its shape
+    '''# find cnt seams to add back to image to retain its shape
     addedSeam=0
     while addedSeam < cnt:
         print("addedSeam", addedSeam)
         adj, cost, cap, n, s1, t, H, W = constructGraph(img, mask)
-        flow, paths = minCostFlow(adj, cost, cap, n, maxSeamNum, s1, t, H, W)
+        flow, paths = minCostFlow(adj, cost, cap, n, 1, s1, t, H, W)
         print("len(paths)", len(paths))
         print("len(paths[0])", len(paths[0]))
         img = add_seams(img, paths)
@@ -187,11 +189,13 @@ def objectRemoval(imagePath,maskPath):
         img = img.astype(np.int16)
     if flag:
         img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
-    print("img.shape", img.shape)
-    cv2.imwrite("deleted.png", img)
+    print("img.shape", img.shape)'''
+
+    img=util.seams_insertion(img,cnt)
+    cv2.imwrite("inserted.png", img)
 
 
 start = time.time()
-objectRemoval('../figures/pic.jpg', '../figures/mask.jpg')
+objectRemoval('../figures/duck.jpg', '../figures/duck_mask.jpg')
 end = time.time()
 print("循环运行时间:%.2f秒"%(end-start))
