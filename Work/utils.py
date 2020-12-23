@@ -119,6 +119,26 @@ def max_width(mask):
     # print("max width: {}".format(max_wid))
     return max_wid
 
+# @author: Weixiong Lin
+def max_width_2(mask):
+    """
+    Calculate width by light points
+    """
+    mask_img = mask
+    ret, mask_img = cv2.threshold(mask_img, 30, 255, cv2.THRESH_BINARY)
+    height, width = mask_img.shape
+
+    # cv2.imwrite("shit.png", mask_img)
+    max_wid = 0
+    # count max width
+    for i in range(height):
+        # initialize leftend and rightend of mask area as -1
+        row_width = 0
+        for j in range(width-1):
+            if mask_img[i, j] > 0:
+                row_width += 1
+        max_wid = max(max_wid, row_width)
+    return max_wid
 
 # @author: Weixiong Lin
 def delete_seams(img, mask, paths):
@@ -223,6 +243,6 @@ def add_seam(out_image, seam_idx):
 
 mask = cv2.imread("../figures/duck_mask.jpg", 0)
 ro_mask = cv2.imread("../figures/ro.jpg", 0)
-# print(max_width(mask))
+print(max_width_2(mask))
 print("=======================================")
-print(max_width(ro_mask))
+print(max_width_2(ro_mask))
