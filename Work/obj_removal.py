@@ -1,6 +1,6 @@
 '''
-12.21 update
-delete some useless repeated calculation
+12.23 update
+change ways to calculate width of mask
 '''
 
 import numpy as np
@@ -8,16 +8,16 @@ from queue import Queue
 from collections import defaultdict
 import imutils
 import cv2
-from git_utils import *
+from utils import *
 import utils2 as util
 # from git_utils import *
 import imutils,cv2
 import time
 
 INF = 1e9
-constant = 1000
-connectionWidth=3 
-maxSeamNum=10
+constant = 8000
+connectionWidth=1
+maxSeamNum=3
 
 def constructGraph(img,mask):
     '''
@@ -153,11 +153,11 @@ def objectRemoval(imagePath,maskPath):
     flag = 0  # if flag=1, rotation has been performed
 
     ratio = 1
-    maskWidth = max_width(mask) // ratio
+    maskWidth = max_width_2(mask) // ratio
     rotatedMask = cv2.rotate(mask, cv2.ROTATE_90_CLOCKWISE)
     cv2.imwrite("mask.jpg", mask)
     cv2.imwrite("rotated.jpg", rotatedMask)
-    rotatedMaskWidth = max_width(rotatedMask) // ratio
+    rotatedMaskWidth = max_width_2(rotatedMask) // ratio
     print("maskWidth", maskWidth)
     print("rotatedMaskWidth", rotatedMaskWidth)
     print("min width", min(maskWidth, rotatedMaskWidth))
@@ -166,15 +166,16 @@ def objectRemoval(imagePath,maskPath):
         mask = rotatedMask
         flag = 1
     cnt = 0
-    while len(np.where(mask[:, :] > 0)[0]) > 0:
+    width=max_width_2(mask)
+    while width > 0:
         print("cnt: ", cnt)
         adj,cost,cap,n,s1,t,H,W=constructGraph(img,mask)
-        width=max_width(mask)
         print(f'width={width}')
         seamNum=min(width,maxSeamNum)
         flow,paths=minCostFlow(adj,cost,cap,n,seamNum,s1,t,H,W)
         cnt += flow
         img,mask = delete_seams(img, mask, paths)
+        width=max_width_2(mask)
     cv2.imwrite('deleted.jpg',img)
     print("img.shape", img.shape)
     '''# find cnt seams to add back to image to retain its shape
@@ -197,6 +198,6 @@ def objectRemoval(imagePath,maskPath):
 
 
 start = time.time()
-objectRemoval('../figures/duck.jpg', '../figures/duck_mask.jpg')
+objectRemoval('../figures/cp_compressed.jpg', '../figures/cp_compressed_mask.jpg')
 end = time.time()
 print("循环运行时间:%.2f秒"%(end-start))
