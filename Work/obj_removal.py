@@ -1,72 +1,106 @@
-'''edge:[from,to,capacity,cost]
-usage: objectRemoval(image,mask)
 '''
-import cv2, imageio
+12.21 update
+delete some useless repeated calculation
+'''
+
 import numpy as np
 from queue import Queue
 from collections import defaultdict
-from utils import *
+import imutils
+import cv2
+from git_utils import *
+import utils2 as util
+# from git_utils import *
+import imutils,cv2
+import time
 
 INF = 1e9
 constant = 1000
+connectionWidth=3 
+maxSeamNum=10
 
+def constructGraph(img,mask):
+    '''
+    :param img: numpy array
+    :param mask: numpy array
+    :return:
+        edges(looks like [[t,v1,v2,s],[...],...]),
+        s1(source,type is int),
+        t(sink, type is int)
+    '''
 
-def objectRemoval(image, mask):
-    '''return: number of paths, paths, for each path in paths,
-    the sequence is from sink to source'''
-    mat = imageio.imread(image)
-    mask = cv2.imread(mask, 0).astype(np.int32)
-    print(mask.shape)
-    H = mat.shape[0]
-    W = mat.shape[1]
-
-    eMap = calc_energy_map(mat).astype(np.int32)
+    H = img.shape[0]
+    W = img.shape[1]
+    eMap = calc_energy_map(img).astype(np.int64)
     eMap[np.where(mask[:, :] > 0)] *= -constant
-    bottleNeck = 4  # Here needs to be rectified
-    edges = []
+    s1, s2 = 2 * W * H , 2 * W * H +1  # caution
+    t = 2 * W * H+2
 
-    s1, s2 = 2 * W * H, 2 * W * H + 2
-    t = 2 * W * H + 4
+    adj = [[] for i in range(2 * W * H + 3)]
+    cap,costDic=dict(),dict()
     # The following part is to add edges
-    # I don't added any reversed edges to boost speed
+    # I don't add any reversed edges to boost speed
     # add edge (s1,s2)
-    edges.append([s1, s2, bottleNeck, 0])
+    adj[s1].append(s2)
+    cap[(s1,s2)]=maxSeamNum
+    costDic[(s1,s2)]=0
     # add edges from s2 to all nodes in the first row
     for y in range(W):
         cost = eMap[0][y] >> 1
-        edges.append([s2, 2 * y, 1, cost])
+        nodeNum=2*y
+        adj[s2].append(nodeNum)
+        cap[(s2, nodeNum)] = 1
+        costDic[(s2, nodeNum)] = cost
     # add edges in the following rows
     for x in range(H - 1):
-        for y in range(bottleNeck + 1):
-            edges.append([2 * W * x + 2 * y, 2 * W * x + 2 * y + 1, 1, 0])
-            for newY in range(y + bottleNeck + 1):
+        for y in range(connectionWidth + 1):
+            nodeNum=2 * W * x + 2 * y
+            adj[nodeNum].append(nodeNum+1)
+            cap[(nodeNum,nodeNum+1)]=1
+            costDic[(nodeNum,nodeNum+1)]=0 # split the node in layer x
+            for newY in range(y + connectionWidth + 1):
                 cost = (eMap[x][y] + eMap[x + 1][newY]) >> 1
-                edges.append([2 * W * x + 2 * y + 1, 2 * W * (x + 1) + 2 * newY, 1, cost])
-        for y in range(bottleNeck + 1, W - bottleNeck - 1):
-            edges.append([2 * W * x + 2 * y, 2 * W * x + 2 * y + 1, 1, 0])
-            for newY in range(y - bottleNeck, y + bottleNeck + 1):
+                newNodeNum=2 * W * (x + 1) + 2 * newY
+                adj[nodeNum+1].append(newNodeNum)
+                cap[(nodeNum+1, newNodeNum)] = 1
+                costDic[(nodeNum+1, newNodeNum)] = cost
+        for y in range(connectionWidth + 1, W - connectionWidth - 1):
+            nodeNum = 2 * W * x + 2 * y
+            adj[nodeNum].append(nodeNum + 1)
+            cap[(nodeNum, nodeNum + 1)] = 1
+            costDic[(nodeNum, nodeNum + 1)] = 0
+            for newY in range(y - connectionWidth, y + connectionWidth + 1):
                 cost = (eMap[x][y] + eMap[x + 1][newY]) >> 1
-                edges.append([2 * W * x + 2 * y + 1, 2 * W * (x + 1) + 2 * newY, 1, cost])
-        for y in range(W - bottleNeck - 1, W):
-            edges.append([2 * W * x + 2 * y, 2 * W * x + 2 * y + 1, 1, 0])
-            for newY in range(y - bottleNeck, W):
+                newNodeNum = 2 * W * (x + 1) + 2 * newY
+                adj[nodeNum + 1].append(newNodeNum)
+                cap[(nodeNum + 1, newNodeNum)] = 1
+                costDic[(nodeNum + 1, newNodeNum)] = cost
+        for y in range(W - connectionWidth - 1, W):
+            nodeNum = 2 * W * x + 2 * y
+            adj[nodeNum].append(nodeNum + 1)
+            cap[(nodeNum, nodeNum + 1)] = 1
+            costDic[(nodeNum, nodeNum + 1)] = 0
+            for newY in range(y - connectionWidth, W):
                 cost = (eMap[x][y] + eMap[x + 1][newY]) >> 1
-                edges.append([2 * W * x + 2 * y + 1, 2 * W * (x + 1) + 2 * newY, 1, cost])
+                newNodeNum = 2 * W * (x + 1) + 2 * newY
+                adj[nodeNum + 1].append(newNodeNum)
+                cap[(nodeNum + 1, newNodeNum)] = 1
+                costDic[(nodeNum + 1, newNodeNum)] = cost
     # add edges from all nodes in the last row to sink node t
     for y in range(W):
-        edges.append([2 * W * (H - 1) + 2 * y, 2 * W * (H - 1) + 2 * y + 1, 1, 0])
+        nodeNum=2 * W * (H - 1) + 2 * y
+        adj[nodeNum].append(nodeNum+1)
+        cap[(nodeNum, nodeNum+1)] = 1
+        costDic[(nodeNum,nodeNum+1)] = 0
+
         cost = eMap[H - 1][y] >> 1
-        edges.append([2 * W * (H - 1) + 2 * y + 1, t, 1, cost])
+        adj[nodeNum+1].append(t)
+        cap[(nodeNum+1, t)] = 1
+        costDic[(nodeNum+1, t)] = cost
 
-    num = H * W * 2 + 5
-    numOfSeam, paths = minCostFlow(num, edges, bottleNeck, s1, t)
-    print(f'number of seams={numOfSeam}')
-    for path in paths:
-        print(f'{path}\n')
-    return numOfSeam, paths
+    return adj,costDic,cap,2 * W * H + 3,s1,t,H,W
 
-
-def shortestPath(n, v0, t, adj, cap, cost):
+def shortestPath(n, v0, t, adj, cap, cost, H, W):
     dist = [INF] * n
     prev = [0] * n
     dist[v0] = 0
@@ -88,45 +122,81 @@ def shortestPath(n, v0, t, adj, cap, cost):
         return -1, []
     # find path
     cur = t
-    path = [cur]  # path is from t to s, which is in reversed order
+    path = []  # path is from t to s, which is in reversed order. It doesn't include t and v0.
+    _W = 2 * W
     while cur != v0:
         cap[(prev[cur], cur)] -= 1
         cur = prev[cur]
-        if cur % 2 == 0:
-            path.append(cur)
+        if cur < 2 * H * W and cur % 2 == 0:
+            x = cur // _W
+            y = (cur - _W * x) // 2
+            path.append((x, y))
     return 0, path
 
-
-def minCostFlow(N, edges, K, s, t):
-    adj = [[] for i in range(N)]
-    cost = defaultdict(int)
-    cap = defaultdict(int)
-
-    for (source, desti, capacity, _cost) in edges:
-        adj[source].append(desti)
-        cap[(source, desti)] = capacity
-        cost[(source, desti)] = _cost
-
+def minCostFlow(adj,cost,cap, N, K, s, t, H, W):
     flow = 0
     paths = []
     while flow < K:
         flow += 1
-        print(f'flow={flow}')
-        flag, path = shortestPath(N, s, t, adj, cap, cost)
-        print(path)
-        print('finish calc path')
+        # print(f'flow={flow}')
+        flag, path = shortestPath(N, s, t, adj, cap, cost, H, W)
+        # print('finish calc path')
         if flag == -1:
-            break
+            print('can\'t find shortest path, exit')
+            exit(-1)
         paths.append(path)
     return flow, paths
 
+def objectRemoval(imagePath,maskPath):
+    img=cv2.imread(imagePath)
+    mask=cv2.imread(maskPath, 0)
+    flag = 0  # if flag=1, rotation has been performed
 
-image='../figures/pic.jpg'
-mask='../figures/mask.jpg'
+    ratio = 1
+    maskWidth = max_width(mask) // ratio
+    rotatedMask = cv2.rotate(mask, cv2.ROTATE_90_CLOCKWISE)
+    cv2.imwrite("mask.jpg", mask)
+    cv2.imwrite("rotated.jpg", rotatedMask)
+    rotatedMaskWidth = max_width(rotatedMask) // ratio
+    print("maskWidth", maskWidth)
+    print("rotatedMaskWidth", rotatedMaskWidth)
+    print("min width", min(maskWidth, rotatedMaskWidth))
+    if rotatedMaskWidth < maskWidth:
+        img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+        mask = rotatedMask
+        flag = 1
+    cnt = 0
+    while len(np.where(mask[:, :] > 0)[0]) > 0:
+        print("cnt: ", cnt)
+        adj,cost,cap,n,s1,t,H,W=constructGraph(img,mask)
+        width=max_width(mask)
+        print(f'width={width}')
+        seamNum=min(width,maxSeamNum)
+        flow,paths=minCostFlow(adj,cost,cap,n,seamNum,s1,t,H,W)
+        cnt += flow
+        img,mask = delete_seams(img, mask, paths)
+    cv2.imwrite('deleted.jpg',img)
+    print("img.shape", img.shape)
+    '''# find cnt seams to add back to image to retain its shape
+    addedSeam=0
+    while addedSeam < cnt:
+        print("addedSeam", addedSeam)
+        adj, cost, cap, n, s1, t, H, W = constructGraph(img, mask)
+        flow, paths = minCostFlow(adj, cost, cap, n, 1, s1, t, H, W)
+        print("len(paths)", len(paths))
+        print("len(paths[0])", len(paths[0]))
+        img = add_seams(img, paths)
+        addedSeam += flow
+        img = img.astype(np.int16)
+    if flag:
+        img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    print("img.shape", img.shape)'''
 
-# numofpath, paths = objectRemoval(image,mask)
-# print(numofpath)
-# print(paths)
-# print("max width: {}".format(max_width(mask)))
+    img=util.seams_insertion(img,cnt)
+    cv2.imwrite("inserted.png", img)
 
-max_width(mask)
+
+start = time.time()
+objectRemoval('../figures/duck.jpg', '../figures/duck_mask.jpg')
+end = time.time()
+print("循环运行时间:%.2f秒"%(end-start))
