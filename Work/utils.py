@@ -83,37 +83,38 @@ def max_width(mask):
     mask_img = mask
     # cv2.imwrite("mask_img.jpg", mask_img)
     # print("pixel:", mask[0, 0])
-    # ret, mask_img = cv2.threshold(mask_img, 30, 255, cv2.THRESH_BINARY)
+    ret, mask_img = cv2.threshold(mask_img, 30, 255, cv2.THRESH_BINARY)
     # print("shape", mask_img.shape)
     height, width = mask_img.shape
 
     # count max width
     max_wid = 0
-    # for i in range(height):
-    #     # initialize leftend and rightend of mask area as -1
-    #     leftend = -1
-    #     rightend = -1
-    #     for j in range(width-1):
-    #         if mask_img[i, j] > 30 and leftend == -1:
-    #             leftend = j
-    #         if mask_img[i, j] == 0 and mask_img[i, j-1] > 0 and j > 0:
-    #             rightend = j
-    #             cv2.imwrite("mask_img.png", branding(mask_img, (i, j), 1))
-    #             # print("leftend:({}, {}); rightedn:({}, {})\n".format(i, leftend, i, rightend))
-    #             break
-    for col in range(width):
+    for i in range(height):
         # initialize leftend and rightend of mask area as -1
         leftend = -1
         rightend = -1
-        for row in range(height-1):
-            if mask_img[row, col] > 30 and leftend == -1:
-                leftend = row
-            if mask_img[row, col] == 0 and mask_img[row-1, col] > 0 and row > 0:
-                rightend = row
-                # cv2.imwrite("mask_img.png", branding(mask_img, (i, j), 2))
-                # print("leftend:({}, {}); rightedn:({}, {})\n".format(i, leftend, i, rightend))
+        for j in range(width-1):
+            if mask_img[i, j] > 127 and leftend == -1:
+                leftend = j
+            if mask_img[i, j] == 0 and mask_img[i, j-1] > 0 and j > 0:
+                rightend = j
+                cv2.imwrite("mask_img.png", branding(mask_img, (i, j), 1))
+                print("leftend:({}, {}); rightedn:({}, {})\n".format(i, leftend, i, rightend))
                 break
         max_wid = max(max_wid, rightend-leftend)
+    # for col in range(width):
+    #     # initialize leftend and rightend of mask area as -1
+    #     leftend = -1
+    #     rightend = -1
+    #     for row in range(height-1):
+    #         if mask_img[row, col] > 30 and leftend == -1:
+    #             leftend = row
+    #         if mask_img[row, col] == 0 and mask_img[row-1, col] > 0 and row > 0:
+    #             rightend = row
+    #             # cv2.imwrite("mask_img.png", branding(mask_img, (i, j), 2))
+    #             # print("leftend:({}, {}); rightedn:({}, {})\n".format(i, leftend, i, rightend))
+    #             break
+    #     max_wid = max(max_wid, rightend-leftend)
     
     # print("max width: {}".format(max_wid))
     return max_wid
@@ -219,3 +220,9 @@ def add_seam(out_image, seam_idx):
     print("output.shape", output.shape)
     return output
 
+
+mask = cv2.imread("../figures/duck_mask.jpg", 0)
+ro_mask = cv2.imread("../figures/ro.jpg", 0)
+# print(max_width(mask))
+print("=======================================")
+print(max_width(ro_mask))

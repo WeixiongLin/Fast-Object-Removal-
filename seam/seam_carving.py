@@ -31,6 +31,7 @@ class SeamCarver:
                 self.mask = cv2.imread(protect_mask, 0).astype(np.float64)
 
         # kernel for forward energy map calculation
+        print("here00")
         self.kernel_x = np.array([[0., 0., 0.], [-1., 0., 1.], [0., 0., 0.]], dtype=np.float64)
         self.kernel_y_left = np.array([[0., 0., 0.], [0., 0., 1.], [0., -1., 0.]], dtype=np.float64)
         self.kernel_y_right = np.array([[0., 0., 0.], [1., 0., 0.], [0., -1., 0.]], dtype=np.float64)
@@ -50,6 +51,7 @@ class SeamCarver:
         """
         if self.object:
             self.object_removal()
+            print("here01")
         else:
             self.seams_carving()
 
@@ -123,6 +125,7 @@ class SeamCarver:
         """
         rotate = False
         object_height, object_width = self.get_object_dimension()
+        print(object_height, object_width)
         if object_height < object_width:
             self.out_image = self.rotate_image(self.out_image, 1)
             self.mask = self.rotate_mask(self.mask, 1)
@@ -131,6 +134,7 @@ class SeamCarver:
         # 计数器
         cnt = 0
         while len(np.where(self.mask[:, :] > 0)[0]) > 0:
+            print("cnt:", cnt)
             energy_map = self.calc_energy_map()
             energy_map[np.where(self.mask[:, :] > 0)] *= -self.constant
             cumulative_map = self.cumulative_map_forward(energy_map)
@@ -145,7 +149,7 @@ class SeamCarver:
         else:
             num_pixels = self.in_height - self.out_image.shape[1]
 
-        self.seams_insertion(num_pixels)
+        self.seams_insertion(num_pixels, cnt)
         if rotate:
             self.out_image = self.rotate_image(self.out_image, 0)
 
@@ -171,7 +175,7 @@ class SeamCarver:
                 self.delete_seam(seam_idx)
 
 
-    def seams_insertion(self, num_pixel):
+    def seams_insertion(self, num_pixel, cnt=0):
         if self.protect:
             temp_image = np.copy(self.out_image)
             temp_mask = np.copy(self.mask)
@@ -191,13 +195,18 @@ class SeamCarver:
             n = len(seams_record)
             for dummy in range(n):
                 seam = seams_record.pop(0)
+                print("cnt:", cnt)
+                cv2.imwrite("out/" + str(cnt) + ".png", self.rotate(self.out_image.astype(np.uint8), 90))
+                cnt += 1
                 self.add_seam(seam)
                 self.add_seam_on_mask(seam)
                 seams_record = self.update_seams(seams_record, seam)
         else:
             temp_image = np.copy(self.out_image)
             seams_record = []
+            print("here02")
             for dummy in range(num_pixel):
+                print("dummy:", dummy)
                 energy_map = self.calc_energy_map()
                 cumulative_map = self.cumulative_map_backward(energy_map)  # 这一步有点慢
                 seam_idx = self.find_seam(cumulative_map)
@@ -206,8 +215,12 @@ class SeamCarver:
 
             self.out_image = np.copy(temp_image)
             n = len(seams_record)
+            print("n:", n)
             for dummy in range(n):
                 seam = seams_record.pop(0)
+                print("cnt:", cnt)
+                cv2.imwrite("out/" + str(cnt) + ".png", self.rotate(self.out_image.astype(np.uint8), 90))
+                cnt += 1
                 self.add_seam(seam)
                 seams_record = self.update_seams(seams_record, seam)
 

@@ -195,7 +195,9 @@ def objectRemoval(imagePath,maskPath):
     cv2.imwrite("inserted.png", img)
 
 
+img = cv2.imread("../figures/duck_mask.jpg")
+print(img.shape)
 start = time.time()
-objectRemoval('../figures/duck.jpg', '../figures/duck_mask.jpg')
+# objectRemoval('../figures/duck.jpg', '../figures/duck_mask.jpg')
 end = time.time()
 print("循环运行时间:%.2f秒"%(end-start))
